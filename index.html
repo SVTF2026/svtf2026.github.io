@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>SVTF 2026 Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 14px 25px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #1a73e8;
+      color: white;
+    }
+
+    #result {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📷 SVTF 2026</h1>
+
+  <h2>Contrôle de présence</h2>
+
+  <button onclick="startScanner()">
+    📷 Scanner le QR
+  </button>
+
+  <button onclick="stopScanner()">
+    Arrêter
+  </button>
+
+  <div id="reader"></div>
+
+  <div id="result">
+    Prêt à scanner.
+  </div>
+
+  <script>
+
+    let scanner = null;
+
+    async function startScanner() {
+
+      const result = document.getElementById("result");
+
+      result.innerHTML = "📷 Recherche de la caméra...";
+
+      try {
+
+        const cameras = await Html5Qrcode.getCameras();
+
+        if (!cameras || cameras.length === 0) {
+
+          result.innerHTML =
+            "<span class='error'>❌ Aucune caméra détectée.</span>";
+
+          return;
+        }
+
+        let cameraId = cameras[0].id;
+
+        // Chercher de préférence la caméra arrière
+        for (let camera of cameras) {
+
+          const label =
+            (camera.label || "").toLowerCase();
+
+          if (
+            label.includes("back") ||
+            label.includes("rear") ||
+            label.includes("environment") ||
+            label.includes("arrière")
+          ) {
+            cameraId = camera.id;
+            break;
+          }
+        }
+
+        scanner = new Html5Qrcode("reader");
+
+        await scanner.start(
+          cameraId,
+          {
+            fps: 10,
+            qrbox: {
+              width: 250,
+              height: 250
+            }
+          },
+
+          function(decodedText) {
+
+            scanner.stop();
+
+            document.getElementById("result").innerHTML =
+              "<span class='success'>" +
+              "✅ QR détecté<br><br>" +
+              decodedText +
+              "</span>";
+
+          },
+
+          function(errorMessage) {
+            // Ignorer les erreurs normales de recherche QR
+          }
+        );
+
+        result.innerHTML =
+          "📷 Présentez le QR code devant la caméra.";
+
+      } catch (error) {
+
+        result.innerHTML =
+          "<span class='error'>" +
+          "❌ Impossible d'utiliser la caméra.<br><br>" +
+          error +
+          "</span>";
+
+      }
+    }
+
+    function stopScanner() {
+
+      if (scanner) {
+
+        scanner.stop()
+          .catch(function() {})
+          .finally(function() {
+
+            scanner.clear()
+              .catch(function() {});
+
+          });
+
+      }
+
+      document.getElementById("reader").innerHTML = "";
+
+      document.getElementById("result").innerHTML =
+        "Scanner arrêté.";
+
+    }
+
+  </script>
+
+</body>
+</html>
