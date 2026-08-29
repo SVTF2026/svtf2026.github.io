@@ -321,46 +321,115 @@
     // AFFICHER LA FAMILLE
     // =====================================================
 
-    function showFamily(data) {
+function showFamily(data) {
 
-      document.getElementById("result")
-        .innerHTML =
+  let message = "";
 
-        "<strong>" +
-        data.familyId +
-        "</strong>" +
+  // =====================================================
+  // QR DÉJÀ ENREGISTRÉ
+  // =====================================================
 
-        "<br><br>" +
+  if (data.alreadyScanned) {
 
-        "Participants inscrits : " +
+    message =
 
-        "<strong>" +
-        data.registered +
-        "</strong>" +
+      "<span class='error'>" +
+      "⚠️ QR DÉJÀ ENREGISTRÉ" +
+      "</span>" +
 
-        "<br><br>" +
+      "<br><br>" +
 
-        "Combien de personnes sont présentes maintenant ?" +
+      "<strong>" +
+      data.familyId +
+      "</strong>" +
 
-        "<br>" +
+      "<br><br>" +
 
-        "<input " +
-        "id='presentNow' " +
-        "type='number' " +
-        "min='0' " +
-        "inputmode='numeric'>" +
+      "Participants inscrits : " +
+      "<strong>" +
+      data.registered +
+      "</strong>" +
 
-        "<br>" +
+      "<br><br>" +
 
-        "<button onclick='savePresence(" +
-        JSON.stringify(data.familyId) +
-        ")'>" +
+      "Participants déjà présents : " +
+      "<strong>" +
+      data.alreadyPresent +
+      "</strong>" +
 
-        "✅ VALIDER" +
+      "<br><br>" +
 
-        "</button>";
+      "Combien de nouvelles personnes arrivent maintenant ?" +
 
-    }
+      "<br>" +
+
+      "<input " +
+      "id='presentNow' " +
+      "type='number' " +
+      "min='0' " +
+      "inputmode='numeric'>" +
+
+      "<br>" +
+
+      "<button onclick='savePresence(" +
+      JSON.stringify(data.familyId) +
+      ")'>" +
+
+      "➕ AJOUTER" +
+
+      "</button>";
+
+  }
+
+  // =====================================================
+  // PREMIER SCAN
+  // =====================================================
+
+  else {
+
+    message =
+
+      "<strong>" +
+      data.familyId +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "Participants inscrits : " +
+
+      "<strong>" +
+      data.registered +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "Combien de personnes sont présentes maintenant ?" +
+
+      "<br>" +
+
+      "<input " +
+      "id='presentNow' " +
+      "type='number' " +
+      "min='0' " +
+      "inputmode='numeric'>" +
+
+      "<br>" +
+
+      "<button onclick='savePresence(" +
+      JSON.stringify(data.familyId) +
+      ")'>" +
+
+      "✅ VALIDER" +
+
+      "</button>";
+
+  }
+
+
+  document.getElementById("result").innerHTML =
+    message;
+
+}
 
 
     // =====================================================
