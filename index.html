@@ -83,7 +83,7 @@
 }
 
 .temple-name {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #8b1a1a;
 }
@@ -121,10 +121,70 @@
   font-size: 20px;
   margin-bottom: 5px;
 }
-  </style>
+<style>
+
+  body {
+    ...
+  }
+
+  h1 {
+    ...
+  }
+
+  /* tous tes autres styles */
+  ...
+
+  @media (max-width: 600px) {
+
+    body {
+      padding: 10px;
+    }
+
+    .temple-header {
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .temple-name {
+      font-size: 18px;
+    }
+
+    .ornament {
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+
+    h1 {
+      font-size: 21px;
+      margin: 8px 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 8px 0;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 11px 15px;
+      margin: 6px;
+    }
+
+    #reader {
+      margin: 10px auto;
+    }
+
+    #result {
+      margin-top: 10px;
+      padding: 12px;
+    }
+
+  }
+
+</style>
 </head>
 
-<body>
+  <body>
 
   <div class="temple-header">
     <div class="ornament">❈ ॐ ❈</div>
@@ -139,21 +199,17 @@
 
   <div class="mode-buttons">
 
-    <button onclick="setMode('presence')" id="presenceModeButton">
-      📷 CONTRÔLE PRÉSENCE
-    </button>
+    <button onclick="setModeAndScan('presence')" id="presenceModeButton">
+  📷 CONTRÔLE PRÉSENCE
+</button>
 
-    <button onclick="setMode('gift')" id="giftModeButton">
-      🎁 RETURN GIFT
-    </button>
+<button onclick="setModeAndScan('gift')" id="giftModeButton">
+  🎁 RETURN GIFT
+</button>
 
   </div>
 
   <br>
-
-  <button onclick="startScanner()">
-    📷 Scanner le QR
-  </button>
 
   <button id="stopButton" onclick="stopScanner()">
     Arrêter
@@ -215,6 +271,30 @@ function setMode(mode) {
 
 }
 
+    function setModeAndScan(mode) {
+
+  setMode(mode);
+
+  const result =
+    document.getElementById("result");
+
+  if (mode === "gift") {
+
+    result.innerHTML =
+      "🎁 Return Gift<br>" +
+      "📷 Scanner le QR code";
+
+  } else {
+
+    result.innerHTML =
+      "📷 Contrôle de présence<br>" +
+      "Scanner le QR code";
+
+  }
+
+  startScanner();
+
+}
     // =====================================================
     // DÉMARRER LE SCANNER
     // =====================================================
