@@ -68,15 +68,88 @@
       color: green;
       font-weight: bold;
     }
+/* =====================================================
+   STYLE SVTF
+   ===================================================== */
 
+.temple-header {
+  background: linear-gradient(135deg, #fff8e1, #ffffff);
+  border: 2px solid #d4a017;
+  border-radius: 14px;
+  padding: 14px 10px;
+  margin: 0 auto 20px auto;
+  max-width: 600px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.temple-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #8b1a1a;
+}
+
+.ornament {
+  color: #d4a017;
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.mode-buttons {
+  margin: 10px auto;
+}
+
+#presenceModeButton {
+  background: #1a73e8;
+}
+
+#giftModeButton {
+  background: #8b1a1a;
+}
+
+.temple-footer {
+  max-width: 600px;
+  margin: 30px auto 10px auto;
+  padding: 16px 10px;
+  border-top: 2px solid #d4a017;
+  color: #8b1a1a;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.footer-ornament {
+  color: #d4a017;
+  font-size: 20px;
+  margin-bottom: 5px;
+}
   </style>
 </head>
 
 <body>
 
+  <div class="temple-header">
+    <div class="ornament">❈ ॐ ❈</div>
+    <div class="temple-name">
+      Sri Venkateswara Temple France
+    </div>
+  </div>
+
   <h1>📷 SVTF 2026</h1>
 
-  <h2>Contrôle de présence</h2>
+  <h2 id="modeTitle">Contrôle de présence</h2>
+
+  <div class="mode-buttons">
+
+    <button onclick="setMode('presence')" id="presenceModeButton">
+      📷 CONTRÔLE PRÉSENCE
+    </button>
+
+    <button onclick="setMode('gift')" id="giftModeButton">
+      🎁 RETURN GIFT
+    </button>
+
+  </div>
+
+  <br>
 
   <button onclick="startScanner()">
     📷 Scanner le QR
@@ -85,7 +158,6 @@
   <button id="stopButton" onclick="stopScanner()">
     Arrêter
   </button>
-
   <div id="reader"></div>
 
   <div id="result">
@@ -104,7 +176,44 @@
 
 
     let scanner = null;
+// =====================================================
+// MODE DU SCANNER : PRÉSENCE OU RETURN GIFT
+// =====================================================
 
+let scannerMode = "presence";
+
+function setMode(mode) {
+
+  scannerMode = mode;
+
+  const title =
+    document.getElementById("modeTitle");
+
+  const result =
+    document.getElementById("result");
+
+
+  if (mode === "gift") {
+
+    title.innerHTML =
+      "🎁 Distribution Return Gift";
+
+    result.innerHTML =
+      "Mode Return Gift sélectionné.<br><br>" +
+      "📷 Appuyez sur Scanner le QR.";
+
+  } else {
+
+    title.innerHTML =
+      "Contrôle de présence";
+
+    result.innerHTML =
+      "Mode contrôle de présence sélectionné.<br><br>" +
+      "📷 Appuyez sur Scanner le QR.";
+
+  }
+
+}
 
     // =====================================================
     // DÉMARRER LE SCANNER
@@ -186,11 +295,20 @@
 
           function(decodedText) {
 
-            scanner.stop();
+  scanner.stop();
 
-            verifyFamily(decodedText);
+  if (scannerMode === "gift") {
 
-          },
+    verifyReturnGift(decodedText);
+
+  } else {
+
+    verifyFamily(decodedText);
+
+  }
+
+},
+          
 
 
           function(errorMessage) {
@@ -316,7 +434,137 @@
 
     }
 
+// =====================================================
+// RETURN GIFT - VÉRIFIER LE QR
+// =====================================================
 
+async function verifyReturnGift(familyId) {
+
+  const result =
+    document.getElementById("result");
+
+  result.innerHTML =
+    "⏳ Vérification Return Gift...";
+
+  try {
+
+    const response =
+      await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
+
+        body: JSON.stringify({
+
+          action: "findReturnGift",
+
+          familyId: familyId
+
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+
+    if (!data.success) {
+
+      result.innerHTML =
+        "<span class='error'>" +
+        "❌ " +
+        data.message +
+        "</span>";
+
+      return;
+    }
+
+
+    // ===============================================
+    // CADEAUX DÉJÀ DISTRIBUÉS
+    // ===============================================
+
+    if (data.alreadyDistributed) {
+
+      result.innerHTML =
+
+        "<span class='error'>" +
+
+        "⚠️ RETURN GIFT DÉJÀ DISTRIBUÉ" +
+
+        "</span>" +
+
+        "<br><br>" +
+
+        "<strong>" +
+        data.familyId +
+        "</strong>" +
+
+        "<br><br>" +
+
+        "Cadeaux déjà remis : " +
+
+        "<strong>" +
+        data.giftsGiven +
+        "</strong>";
+
+      return;
+    }
+
+
+    // ===============================================
+    // CADEAUX À DISTRIBUER
+    // ===============================================
+
+    result.innerHTML =
+
+      "<strong>" +
+      data.familyId +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "Participants présents : " +
+
+      "<strong>" +
+      data.totalPresent +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "🎁 Cadeaux à remettre : " +
+
+      "<strong>" +
+      data.giftsAllowed +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "<button onclick='saveReturnGift(" +
+      JSON.stringify(data.familyId) +
+      ")'>" +
+
+      "🎁 DISTRIBUER" +
+
+      "</button>";
+
+
+  } catch (error) {
+
+    result.innerHTML =
+      "<span class='error'>" +
+      "❌ Erreur de connexion.<br><br>" +
+      error.message +
+      "</span>";
+
+  }
+
+}
+    
     // =====================================================
     // AFFICHER LA FAMILLE
     // =====================================================
@@ -571,8 +819,158 @@ function showFamily(data) {
       }
 
     }
+// =====================================================
+// RETURN GIFT - ENREGISTRER LA DISTRIBUTION
+// =====================================================
 
+async function saveReturnGift(familyId) {
+
+  const result =
+    document.getElementById("result");
+
+  result.innerHTML =
+    "⏳ Enregistrement des cadeaux...";
+
+  try {
+
+    const response =
+      await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
+
+        body: JSON.stringify({
+
+          action: "saveReturnGift",
+
+          familyId: familyId
+
+        })
+
+      });
+
+
+    const data =
+      await response.json();
+
+
+    // Cadeaux déjà distribués
+    if (!data.success) {
+
+      if (data.alreadyDistributed) {
+
+        result.innerHTML =
+
+          "<span class='error'>" +
+
+          "⚠️ RETURN GIFT DÉJÀ DISTRIBUÉ" +
+
+          "</span>" +
+
+          "<br><br>" +
+
+          "<strong>" +
+          familyId +
+          "</strong>" +
+
+          "<br><br>" +
+
+          "Cadeaux déjà remis : " +
+
+          "<strong>" +
+          data.giftsGiven +
+          "</strong>";
+
+        return;
+
+      }
+
+
+      result.innerHTML =
+
+        "<span class='error'>" +
+
+        "❌ " +
+
+        data.message +
+
+        "</span>";
+
+      return;
+
+    }
+
+
+    // Distribution réussie
+    result.innerHTML =
+
+      "<span class='success'>" +
+
+      "✅ RETURN GIFT DISTRIBUÉ" +
+
+      "</span>" +
+
+      "<br><br>" +
+
+      "<strong>" +
+      data.familyId +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "Participants présents : " +
+
+      "<strong>" +
+      data.totalPresent +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "🎁 Cadeaux remis : " +
+
+      "<strong>" +
+      data.giftsGiven +
+      "</strong>" +
+
+      "<br><br>" +
+
+      "<button onclick='startScanner()'>" +
+
+      "🎁 SCANNER LE PROCHAIN QR" +
+
+      "</button>";
+
+
+  } catch (error) {
+
+    result.innerHTML =
+
+      "<span class='error'>" +
+
+      "❌ Erreur de connexion.<br><br>" +
+
+      error.message +
+
+      "</span>";
+
+  }
+
+}
   </script>
+<div class="temple-footer">
 
+  <div class="footer-ornament">
+    ❈ ॐ ❈
+  </div>
+
+  <div>
+    Srivari Srinivasa Kalyanam 2026
+  </div>
+
+</div>
 </body>
 </html>
