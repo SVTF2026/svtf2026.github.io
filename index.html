@@ -186,12 +186,20 @@
 
   <body>
 
+  <div id="topSection">
+
   <div class="temple-header">
     <div class="ornament">❈ ॐ ❈</div>
     <div class="temple-name">
       Sri Venkateswara Temple France
     </div>
   </div>
+
+  <h1>📷 SVTF 2026</h1>
+
+  <h2 id="modeTitle">Choisissez une opération</h2>
+
+</div>
 
   <h1>📷 SVTF 2026</h1>
 
@@ -290,7 +298,8 @@ function setMode(mode) {
       "📷 Contrôle de présence<br>" +
       "Scanner le QR code";
 
-  }
+  } 
+  document.getElementById("topSection").style.display = "none";
 
   startScanner();
 
@@ -439,6 +448,10 @@ function setMode(mode) {
       document.getElementById("result")
         .innerHTML =
         "Scanner arrêté.";
+      document.getElementById("topSection").style.display = "block";
+
+      document.getElementById("modeTitle").innerHTML =
+        "Choisissez une opération";
 
     }
 
