@@ -437,28 +437,33 @@ function setMode(mode) {
 
     function stopScanner() {
 
-      if (scanner) {
+  if (scanner) {
 
-        scanner
-          .stop()
-          .catch(function() {});
+    scanner
+      .stop()
+      .catch(function() {
+        // Le scanner peut déjà être arrêté après lecture du QR.
+      });
 
-      }
+  }
 
+  scanner = null;
 
-      document.getElementById("reader")
-        .innerHTML = "";
+  document.getElementById("reader")
+    .innerHTML = "";
 
+  // Réafficher le haut de la page
+  document.getElementById("topSection")
+    .style.display = "block";
 
-      document.getElementById("result")
-        .innerHTML =
-        "Scanner arrêté.";
-      document.getElementById("topSection").style.display = "block";
+  // Revenir à l'écran principal
+  document.getElementById("modeTitle")
+    .innerHTML = "Choisissez une opération";
 
-      document.getElementById("modeTitle").innerHTML =
-        "Choisissez une opération";
+  document.getElementById("result")
+    .innerHTML = "Prêt à scanner.";
 
-    }
+}
 
 
     // =====================================================
