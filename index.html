@@ -435,33 +435,50 @@ function setMode(mode) {
     // ARRÊTER LE SCANNER
     // =====================================================
 
-    function stopScanner() {
+    async function stopScanner() {
 
-  if (scanner) {
+  try {
 
-    scanner
-      .stop()
-      .catch(function() {
-        // Le scanner peut déjà être arrêté après lecture du QR.
-      });
+    if (scanner && scanner.isScanning) {
+      await scanner.stop();
+    }
+
+  } catch (error) {
+
+    // Si la caméra est déjà arrêtée, on continue normalement.
+
+  }
+
+  try {
+
+    if (scanner) {
+      await scanner.clear();
+    }
+
+  } catch (error) {
+
+    // Pas grave si le scanner est déjà nettoyé.
 
   }
 
   scanner = null;
 
-  document.getElementById("reader")
-    .innerHTML = "";
+  // Nettoyer la zone caméra
+  document.getElementById("reader").innerHTML = "";
 
-  // Réafficher le haut de la page
-  document.getElementById("topSection")
-    .style.display = "block";
+  // Réafficher le haut
+  document.getElementById("topSection").style.display = "block";
 
-  // Revenir à l'écran principal
-  document.getElementById("modeTitle")
-    .innerHTML = "Choisissez une opération";
+  // Revenir au titre initial
+  document.getElementById("modeTitle").innerHTML =
+    "Choisissez une opération";
 
-  document.getElementById("result")
-    .innerHTML = "Prêt à scanner.";
+  // Réinitialiser le mode par défaut
+  scannerMode = "presence";
+
+  // Réinitialiser le message
+  document.getElementById("result").innerHTML =
+    "Prêt à scanner.";
 
 }
 
