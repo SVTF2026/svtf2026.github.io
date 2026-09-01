@@ -194,7 +194,32 @@
 </head>
 
   <body>
+<div id="loginSection">
 
+  <h2>🔐 Accès bénévole</h2>
+
+  <p>
+    Entrez le code d'accès pour utiliser le scanner.
+  </p>
+
+  <input
+    id="volunteerCode"
+    type="password"
+    inputmode="numeric"
+    maxlength="6"
+    placeholder="Code bénévole"
+  >
+
+  <br>
+
+  <button onclick="loginVolunteer()">
+    SE CONNECTER
+  </button>
+
+  <div id="loginMessage"></div>
+
+</div>
+    <div id="appSection" style="display:none;">
   <div id="topSection">
 
   <div class="temple-header">
@@ -245,6 +270,146 @@
 
 
     let scanner = null;
+// =====================================================
+// SESSION BÉNÉVOLE
+// =====================================================
+
+let volunteerToken =
+  sessionStorage.getItem("svtfVolunteerToken") || "";
+let volunteerToken =
+  sessionStorage.getItem("svtfVolunteerToken") || "";
+
+
+// =====================================================
+// SESSION EXPIRÉE / ACCÈS REFUSÉ
+// =====================================================
+
+function handleUnauthorized(data) {
+
+  if (!data || !data.unauthorized) {
+    return false;
+  }
+
+  volunteerToken = "";
+
+  sessionStorage.removeItem(
+    "svtfVolunteerToken"
+  );
+
+  document.getElementById("appSection")
+    .style.display = "none";
+
+  document.getElementById("loginSection")
+    .style.display = "block";
+
+  document.getElementById("loginMessage")
+    .innerHTML =
+    "<span class='error'>" +
+    "🔒 Session expirée. Veuillez saisir de nouveau le code bénévole." +
+    "</span>";
+
+  return true;
+}
+
+
+// =====================================================
+// CONNEXION BÉNÉVOLE
+// =====================================================
+
+async function loginVolunteer() {
+// =====================================================
+// CONNEXION BÉNÉVOLE
+// =====================================================
+
+async function loginVolunteer() {
+
+  const code =
+    document.getElementById("volunteerCode").value.trim();
+
+  const message =
+    document.getElementById("loginMessage");
+
+  if (!code) {
+
+    message.innerHTML =
+      "<span class='error'>Veuillez entrer le code bénévole.</span>";
+
+    return;
+  }
+
+  message.innerHTML =
+    "⏳ Vérification...";
+
+  try {
+
+    const response =
+      await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+
+        body: JSON.stringify({
+          action: "loginVolunteer",
+          code: code
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+
+      message.innerHTML =
+        "<span class='error'>❌ " +
+        data.message +
+        "</span>";
+
+      return;
+    }
+
+    volunteerToken =
+      data.token;
+
+    sessionStorage.setItem(
+      "svtfVolunteerToken",
+      volunteerToken
+    );
+
+    document.getElementById("loginSection")
+      .style.display = "none";
+
+    document.getElementById("appSection")
+      .style.display = "block";
+
+  } catch (error) {
+
+    message.innerHTML =
+      "<span class='error'>❌ Erreur de connexion.</span>";
+
+  }
+
+}
+// =====================================================
+// AFFICHAGE AUTOMATIQUE SI SESSION DÉJÀ OUVERTE
+// =====================================================
+
+window.addEventListener("load", function() {
+
+  if (volunteerToken) {
+
+    document.getElementById("loginSection")
+      .style.display = "none";
+
+    document.getElementById("appSection")
+      .style.display = "block";
+
+  }
+
+});
 // =====================================================
 // MODE DU SCANNER : PRÉSENCE OU RETURN GIFT
 // =====================================================
@@ -509,15 +674,15 @@ function setMode(mode) {
                 "text/plain;charset=utf-8"
             },
 
-            body: JSON.stringify({
+           body: JSON.stringify({
 
-              action:
-                "findFamily",
+  action: "findFamily",
 
-              familyId:
-                familyId
+  familyId: familyId,
 
-            })
+  token: volunteerToken
+
+})
 
           });
 
@@ -527,6 +692,9 @@ function setMode(mode) {
 
 
         if (!data.success) {
+          if (handleUnauthorized(data)) {
+  return;
+}
 
           result.innerHTML =
             "<span class='error'>" +
@@ -580,11 +748,13 @@ async function verifyReturnGift(familyId) {
 
         body: JSON.stringify({
 
-          action: "findReturnGift",
+  action: "findReturnGift",
 
-          familyId: familyId
+  familyId: familyId,
 
-        })
+  token: volunteerToken
+
+})
 
       });
 
@@ -593,6 +763,9 @@ async function verifyReturnGift(familyId) {
 
 
     if (!data.success) {
+      if (handleUnauthorized(data)) {
+  return;
+}
 
       result.innerHTML =
         "<span class='error'>" +
@@ -845,18 +1018,17 @@ function showFamily(data) {
                 "text/plain;charset=utf-8"
             },
 
-            body: JSON.stringify({
+           body: JSON.stringify({
 
-              action:
-                "savePresence",
+  action: "savePresence",
 
-              familyId:
-                familyId,
+  familyId: familyId,
 
-              numberNow:
-                number
+  numberNow: number,
 
-            })
+  token: volunteerToken
+
+})
 
           });
 
@@ -866,6 +1038,9 @@ function showFamily(data) {
 
 
         if (!data.success) {
+          if (handleUnauthorized(data)) {
+  return;
+}
 
           document.getElementById("result")
             .innerHTML =
@@ -965,11 +1140,13 @@ async function saveReturnGift(familyId) {
 
         body: JSON.stringify({
 
-          action: "saveReturnGift",
+  action: "saveReturnGift",
 
-          familyId: familyId
+  familyId: familyId,
 
-        })
+  token: volunteerToken
+
+})
 
       });
 
@@ -980,6 +1157,9 @@ async function saveReturnGift(familyId) {
 
     // Cadeaux déjà distribués
     if (!data.success) {
+      if (handleUnauthorized(data)) {
+  return;
+}
 
       if (data.alreadyDistributed) {
 
@@ -1092,5 +1272,6 @@ async function saveReturnGift(familyId) {
   </div>
 
 </div>
+   </div>   
 </body>
 </html>
