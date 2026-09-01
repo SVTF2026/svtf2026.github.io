@@ -204,6 +204,9 @@
     SE CONNECTER
   </button>
 
+  <button onclick="openAdminLogin()" id="adminModeButton">
+  🔐 ADMIN
+</button>
   <div id="loginMessage"></div>
 
 </div>
@@ -231,13 +234,86 @@
 
 <button onclick="setModeAndScan('gift')" id="giftModeButton">
   🎁 RETURN GIFT
-</button>
+</button>     
+  </div>
+<div id="adminLoginSection" style="display:none;">
 
-    <button onclick="openAdminLogin()" id="adminModeButton">
-  🔐 ADMIN
-</button>
+  <h2>🔐 Accès Admin</h2>
+
+  <p>
+    Entrez le code Admin.
+  </p>
+
+  <input
+    id="adminCode"
+    type="password"
+    inputmode="numeric"
+    maxlength="12"
+    placeholder="Code Admin"
+  >
+
+  <br>
+
+  <button onclick="loginAdmin()">
+    SE CONNECTER
+  </button>
+
+  <button onclick="closeAdminLogin()">
+    ANNULER
+  </button>
+
+  <div id="adminLoginMessage"></div>
+
+</div>
+  <div id="adminDashboard" style="display:none;">
+
+  <h2>📊 TABLEAU ADMIN</h2>
+
+  <div class="admin-stats">
+
+    <p>
+      👨‍👩‍👧‍👦 Familles inscrites :
+      <strong id="statFamilies">0</strong>
+    </p>
+
+    <p>
+      👥 Participants inscrits :
+      <strong id="statRegistered">0</strong>
+    </p>
+
+    <p>
+      ✅ Participants présents :
+      <strong id="statPresent">0</strong>
+    </p>
+
+    <p>
+      ➕ Participants supplémentaires :
+      <strong id="statAdditional">0</strong>
+    </p>
+
+    <p>
+      🎁 Cadeaux distribués :
+      <strong id="statGifts">0</strong>
+    </p>
+
+    <p>
+      🏠 Familles ayant reçu le Return Gift :
+      <strong id="statGiftFamilies">0</strong>
+    </p>
+
   </div>
 
+  <button onclick="loadAdminStats()">
+    🔄 ACTUALISER
+  </button>
+
+  <button onclick="closeAdminDashboard()">
+    FERMER ADMIN
+  </button>
+
+  <div id="adminMessage"></div>
+
+</div>
   <br>
 
   <button id="stopButton" onclick="stopScanner()">
@@ -279,22 +355,36 @@ function handleUnauthorized(data) {
     return false;
   }
 
+  // Supprimer les sessions locales
   volunteerToken = "";
+  adminToken = "";
 
   sessionStorage.removeItem(
     "svtfVolunteerToken"
   );
 
+  sessionStorage.removeItem(
+    "svtfAdminToken"
+  );
+
+  // Fermer les écrans protégés
   document.getElementById("appSection")
     .style.display = "none";
 
+  document.getElementById("adminDashboard")
+    .style.display = "none";
+
+  document.getElementById("adminLoginSection")
+    .style.display = "none";
+
+  // Revenir à l'écran de connexion
   document.getElementById("loginSection")
     .style.display = "block";
 
   document.getElementById("loginMessage")
     .innerHTML =
     "<span class='error'>" +
-    "🔒 Session expirée. Veuillez saisir de nouveau le code bénévole." +
+    "🔒 Session expirée. Veuillez vous reconnecter." +
     "</span>";
 
   return true;
@@ -377,13 +467,298 @@ async function loginVolunteer() {
   }
 
 }
+
+    // =====================================================
+// ADMIN - TOKEN
+// =====================================================
+
+let adminToken =
+  sessionStorage.getItem("svtfAdminToken") || "";
+
+  function getActiveToken() {
+
+  if (adminToken) {
+    return adminToken;
+  }
+
+  return volunteerToken;
+}
+
+
+// =====================================================
+// OUVRIR CONNEXION ADMIN
+// =====================================================
+
+function openAdminLogin() {
+
+  document.getElementById("loginSection")
+    .style.display = "none";
+
+  document.getElementById("appSection")
+    .style.display = "block";
+
+  document.getElementById("adminLoginSection")
+    .style.display = "block";
+
+  document.getElementById("adminDashboard")
+    .style.display = "none";
+
+  document.getElementById("adminLoginMessage")
+    .innerHTML = "";
+
+}
+
+
+// =====================================================
+// FERMER CONNEXION ADMIN
+// =====================================================
+
+function closeAdminLogin() {
+
+  document.getElementById("adminLoginSection")
+    .style.display = "none";
+
+  document.getElementById("adminCode")
+    .value = "";
+
+  if (!volunteerToken && !adminToken) {
+
+    document.getElementById("appSection")
+      .style.display = "none";
+
+    document.getElementById("loginSection")
+      .style.display = "block";
+
+  }
+
+}
+
+
+// =====================================================
+// CONNEXION ADMIN
+// =====================================================
+
+async function loginAdmin() {
+
+  const code =
+    document.getElementById("adminCode").value.trim();
+
+  const message =
+    document.getElementById("adminLoginMessage");
+
+  if (!code) {
+
+    message.innerHTML =
+      "<span class='error'>Veuillez entrer le code Admin.</span>";
+
+    return;
+  }
+
+  message.innerHTML =
+    "⏳ Vérification...";
+
+  try {
+
+    const response =
+      await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+
+        body: JSON.stringify({
+          action: "loginAdmin",
+          code: code
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+
+      message.innerHTML =
+        "<span class='error'>❌ " +
+        data.message +
+        "</span>";
+
+      return;
+    }
+
+    adminToken =
+      data.token;
+
+    sessionStorage.setItem(
+      "svtfAdminToken",
+      adminToken
+    );
+
+    document.getElementById("adminLoginSection")
+      .style.display = "none";
+
+    document.getElementById("appSection")
+  .style.display = "block";
+
+    document.getElementById("adminLoginSection")
+  .style.display = "none";
+    
+    document.getElementById("adminCode")
+      .value = "";
+
+    loadAdminStats();
+
+  } catch (error) {
+
+    message.innerHTML =
+      "<span class='error'>❌ Erreur de connexion.</span>";
+
+  }
+
+}
+
+  // =====================================================
+// ADMIN - CHARGER LES STATISTIQUES
+// =====================================================
+
+async function loadAdminStats() {
+
+  const message =
+    document.getElementById("adminMessage");
+
+  if (!adminToken) {
+
+    document.getElementById("adminDashboard")
+      .style.display = "none";
+
+    document.getElementById("adminLoginSection")
+      .style.display = "block";
+
+    return;
+  }
+
+  message.innerHTML =
+    "⏳ Chargement des statistiques...";
+
+  try {
+
+    const response =
+      await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+
+        body: JSON.stringify({
+          action: "getAdminStats",
+          token: adminToken
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+
+    // Session Admin expirée
+    if (data.unauthorized) {
+
+      adminToken = "";
+
+      sessionStorage.removeItem(
+        "svtfAdminToken"
+      );
+
+      document.getElementById("adminDashboard")
+        .style.display = "none";
+
+      document.getElementById("adminLoginSection")
+        .style.display = "block";
+
+      document.getElementById("adminLoginMessage")
+        .innerHTML =
+        "<span class='error'>" +
+        "🔒 Session Admin expirée. Reconnectez-vous." +
+        "</span>";
+
+      return;
+    }
+
+
+    if (!data.success) {
+
+      message.innerHTML =
+        "<span class='error'>❌ " +
+        data.message +
+        "</span>";
+
+      return;
+    }
+
+
+    document.getElementById("statFamilies")
+      .textContent = data.familiesRegistered;
+
+    document.getElementById("statRegistered")
+      .textContent = data.participantsRegistered;
+
+    document.getElementById("statPresent")
+      .textContent = data.participantsPresent;
+
+    document.getElementById("statAdditional")
+      .textContent = data.participantsAdditional;
+
+    document.getElementById("statGifts")
+      .textContent = data.giftsDistributed;
+
+    document.getElementById("statGiftFamilies")
+      .textContent = data.familiesGifted;
+
+
+    document.getElementById("adminLoginSection")
+      .style.display = "none";
+
+    document.getElementById("adminDashboard")
+      .style.display = "block";
+
+    message.innerHTML = "";
+
+  } catch (error) {
+
+    message.innerHTML =
+      "<span class='error'>" +
+      "❌ Impossible de charger les statistiques." +
+      "</span>";
+
+  }
+
+}
+
+
+// =====================================================
+// ADMIN - FERMER LE TABLEAU
+// =====================================================
+
+function closeAdminDashboard() {
+
+  document.getElementById("adminDashboard")
+    .style.display = "none";
+
+  document.getElementById("adminLoginSection")
+    .style.display = "none";
+
+}
 // =====================================================
 // AFFICHAGE AUTOMATIQUE SI SESSION DÉJÀ OUVERTE
 // =====================================================
 
 window.addEventListener("load", function() {
 
-  if (volunteerToken) {
+  if (volunteerToken || adminToken) {
 
     document.getElementById("loginSection")
       .style.display = "none";
@@ -664,7 +1039,7 @@ function setMode(mode) {
 
   familyId: familyId,
 
-  token: volunteerToken
+  token: getActiveToken()
 
 })
 
@@ -736,7 +1111,7 @@ async function verifyReturnGift(familyId) {
 
   familyId: familyId,
 
-  token: volunteerToken
+  token: getActiveToken()
 
 })
 
@@ -1010,7 +1385,7 @@ function showFamily(data) {
 
   numberNow: number,
 
-  token: volunteerToken
+  token: getActiveToken()
 
 })
 
@@ -1128,7 +1503,7 @@ async function saveReturnGift(familyId) {
 
   familyId: familyId,
 
-  token: volunteerToken
+  token: getActiveToken()
 
 })
 
