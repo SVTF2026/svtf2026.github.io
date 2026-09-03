@@ -66,7 +66,21 @@
       color: red;
       font-weight: bold;
     }
+    .warning-blink {
+  color: red;
+  font-weight: bold;
+  animation: warningPulse 1.2s ease-in-out infinite;
+}
 
+@keyframes warningPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
     .success {
       color: green;
       font-weight: bold;
@@ -1299,7 +1313,7 @@ function showFamily(data) {
 
     message =
 
-      "<span class='error'>" +
+      "<span class='warning-blink'>" +
       "⚠️ QR DÉJÀ ENREGISTRÉ" +
       "</span>" +
 
@@ -1554,7 +1568,7 @@ async function saveReturnGift(familyId) {
 
         result.innerHTML =
 
-          "<span class='error'>" +
+          "<span class='warning-blink'>" +
 
           "⚠️ RETURN GIFT DÉJÀ DISTRIBUÉ" +
 
