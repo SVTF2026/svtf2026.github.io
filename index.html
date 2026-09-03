@@ -1050,17 +1050,34 @@ startScanner();
           },
 
 
-          function(decodedText) {
+          async function(decodedText) {
 
-  scanner.stop();
+  // Mémoriser immédiatement le QR lu
+  const scannedFamilyId =
+    decodedText.trim();
 
+  // Éviter une nouvelle lecture pendant le traitement
+  try {
+
+    if (scanner) {
+      await scanner.stop();
+    }
+
+  } catch (error) {
+
+    // La lecture QR est déjà réussie.
+    // Une erreur d'arrêt caméra ne doit pas annuler le QR.
+
+  }
+
+  // Vérifier le QR dans la base
   if (scannerMode === "gift") {
 
-    verifyReturnGift(decodedText);
+    verifyReturnGift(scannedFamilyId);
 
   } else {
 
-    verifyFamily(decodedText);
+    verifyFamily(scannedFamilyId);
 
   }
 
@@ -1247,7 +1264,7 @@ async function verifyReturnGift(familyId) {
     if (data.alreadyDistributed) {
 
       result.innerHTML =
-        "<span class='error'>" +
+        ""<span class='warning-blink'>" +" +
         "⚠️ RETURN GIFT DÉJÀ DISTRIBUÉ" +
         "</span>" +
         "<br><br>" +
