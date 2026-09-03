@@ -838,7 +838,31 @@ function setMode(mode) {
 
 }
 
-    function setModeAndScan(mode) {
+   function setModeAndScan(mode) {
+
+  // Vérifier qu'une session existe
+  const token = getActiveToken();
+
+  if (!token) {
+
+    document.getElementById("appSection")
+      .style.display = "none";
+
+    document.getElementById("adminLoginSection")
+      .style.display = "none";
+
+    document.getElementById("loginSection")
+      .style.display = "block";
+
+    document.getElementById("loginMessage")
+      .innerHTML =
+      "<span class='error'>" +
+      "🔒 Veuillez vous connecter avant d'utiliser le scanner." +
+      "</span>";
+
+    return;
+  }
+
 
   setMode(mode);
 
@@ -857,10 +881,21 @@ function setMode(mode) {
       "📷 Contrôle de présence<br>" +
       "Scanner le QR code";
 
-  } 
-  document.getElementById("topSection").style.display = "none";
+  }
 
-  startScanner();
+  document.getElementById("topSection")
+  .style.display = "none";
+
+document.querySelector(".mode-buttons")
+  .style.display = "none";
+
+document.getElementById("adminDashboard")
+  .style.display = "none";
+
+document.querySelector(".temple-footer")
+  .style.display = "none";
+
+startScanner();
 
 }
     // =====================================================
@@ -1022,6 +1057,11 @@ function setMode(mode) {
 
   // Réafficher le haut
   document.getElementById("topSection").style.display = "block";
+  document.querySelector(".mode-buttons")
+  .style.display = "block";
+
+document.querySelector(".temple-footer")
+  .style.display = "block";
 
   // Revenir au titre initial
   document.getElementById("modeTitle").innerHTML =
