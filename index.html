@@ -638,7 +638,8 @@ function closeAdminLogin() {
 async function loginAdmin() {
 
   const code =
-    document.getElementById("adminCode").value.trim();
+    document.getElementById("adminCode")
+      .value.trim();
 
   const message =
     document.getElementById("adminLoginMessage");
@@ -646,34 +647,26 @@ async function loginAdmin() {
   if (!code) {
 
     message.innerHTML =
-      "<span class='error'>Veuillez entrer le code Admin.</span>";
+      "<span class='error'>" +
+      "Veuillez entrer le code Admin." +
+      "</span>";
 
     return;
   }
 
   message.innerHTML =
-    "⏳ Vérification...";
+    "⏳ Connexion au serveur...";
 
   try {
 
-    const response =
-      await fetch(API_URL, {
-
-        method: "POST",
-
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-
-        body: JSON.stringify({
+    const data =
+      await apiPostWithRetry(
+        {
           action: "loginAdmin",
           code: code
-        })
-
-      });
-
-    const data =
-      await response.json();
+        },
+        message
+      );
 
     if (!data.success) {
 
@@ -685,37 +678,37 @@ async function loginAdmin() {
       return;
     }
 
-   adminToken =
-  data.token;
+    adminToken =
+      data.token;
 
-sessionStorage.setItem(
-  "svtfAdminToken",
-  adminToken
-);
+    sessionStorage.setItem(
+      "svtfAdminToken",
+      adminToken
+    );
 
-// Fermer l'écran de connexion Admin
-document.getElementById("adminLoginSection")
-  .style.display = "none";
+    document.getElementById("adminLoginSection")
+      .style.display = "none";
 
-// Ouvrir l'application
-document.getElementById("appSection")
-  .style.display = "block";
+    document.getElementById("appSection")
+      .style.display = "block";
 
-// Vider le code saisi
-document.getElementById("adminCode")
-  .value = "";
+    document.getElementById("adminCode")
+      .value = "";
 
-// Charger le tableau Admin
-loadAdminStats();
+    message.innerHTML = "";
+
+    loadAdminStats();
+
   } catch (error) {
 
     message.innerHTML =
-      "<span class='error'>❌ Erreur de connexion.</span>";
+      "<span class='error'>" +
+      "❌ Connexion impossible. Veuillez réessayer." +
+      "</span>";
 
   }
 
 }
-
   // =====================================================
 // ADMIN - CHARGER LES STATISTIQUES
 // =====================================================
