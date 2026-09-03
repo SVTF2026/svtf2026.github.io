@@ -357,10 +357,16 @@
   <br>
 
   <button id="stopButton" onclick="stopScanner()">
-    Arrêter
-  </button>
-  <div id="reader"></div>
+  Arrêter
+</button>
 
+<br>
+
+<button onclick="returnToLogin()">
+  ← RETOUR À L’ACCUEIL
+</button>
+
+<div id="reader"></div>
   <div id="result">
     Prêt à scanner.
   </div>
@@ -1164,6 +1170,65 @@ document.querySelector(".temple-footer")
   // Réinitialiser le message
   document.getElementById("result").innerHTML =
     "Prêt à scanner.";
+
+}
+  // =====================================================
+// RETOUR À L'ACCUEIL ET FERMETURE DE LA SESSION
+// =====================================================
+
+async function returnToLogin() {
+
+  try {
+
+    if (scanner && scanner.isScanning) {
+      await scanner.stop();
+    }
+
+  } catch (error) {
+    // Caméra déjà arrêtée
+  }
+
+  try {
+
+    if (scanner) {
+      await scanner.clear();
+    }
+
+  } catch (error) {
+    // Scanner déjà nettoyé
+  }
+
+  scanner = null;
+
+  volunteerToken = "";
+  adminToken = "";
+
+  sessionStorage.removeItem("svtfVolunteerToken");
+  sessionStorage.removeItem("svtfAdminToken");
+
+  document.getElementById("appSection")
+    .style.display = "none";
+
+  document.getElementById("adminDashboard")
+    .style.display = "none";
+
+  document.getElementById("adminLoginSection")
+    .style.display = "none";
+
+  document.getElementById("volunteerCode")
+    .value = "";
+
+  document.getElementById("adminCode")
+    .value = "";
+
+  document.getElementById("loginMessage")
+    .innerHTML = "";
+
+  document.getElementById("adminLoginMessage")
+    .innerHTML = "";
+
+  document.getElementById("loginSection")
+    .style.display = "block";
 
 }
 
