@@ -1402,143 +1402,91 @@ function showFamily(data) {
     // ENREGISTRER LA PRÉSENCE
     // =====================================================
 
-    async function savePresence(familyId) {
+   async function savePresence(familyId) {
 
-      const input =
-        document.getElementById("presentNow");
+  const input =
+    document.getElementById("presentNow");
 
+  const number =
+    Number(input.value);
 
-      const number =
-        Number(input.value);
+  if (
+    !Number.isInteger(number) ||
+    number < 0
+  ) {
 
+    alert(
+      "Veuillez entrer un nombre valide."
+    );
 
-      if (
-        !Number.isInteger(number) ||
-        number < 0
-      ) {
+    return;
+  }
 
-        alert(
-          "Veuillez entrer un nombre valide."
-        );
+  const result =
+    document.getElementById("result");
 
+  result.innerHTML =
+    "⏳ Enregistrement de la présence...";
+
+  try {
+
+    const data =
+      await apiPostWithRetry(
+        {
+          action: "savePresence",
+          familyId: familyId,
+          numberNow: number,
+          token: getActiveToken()
+        },
+        result
+      );
+
+    if (!data.success) {
+
+      if (handleUnauthorized(data)) {
         return;
-
       }
 
+      result.innerHTML =
+        "<span class='error'>" +
+        "❌ " +
+        data.message +
+        "</span>";
 
-      document.getElementById("result")
-        .innerHTML =
-        "⏳ Enregistrement...";
-
-
-      try {
-
-        const response =
-          await fetch(API_URL, {
-
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "text/plain;charset=utf-8"
-            },
-
-           body: JSON.stringify({
-
-  action: "savePresence",
-
-  familyId: familyId,
-
-  numberNow: number,
-
-  token: getActiveToken()
-
-})
-
-          });
-
-
-        const data =
-          await response.json();
-
-
-        if (!data.success) {
-          if (handleUnauthorized(data)) {
-  return;
-}
-
-          document.getElementById("result")
-            .innerHTML =
-
-            "<span class='error'>" +
-
-            "❌ " +
-
-            data.message +
-
-            "</span>";
-
-          return;
-
-        }
-
-
-        document.getElementById("result")
-          .innerHTML =
-
-          "<span class='success'>" +
-
-          "✅ Présence enregistrée" +
-
-          "<br><br>" +
-
-          familyId +
-
-          "<br><br>" +
-
-          "Participants inscrits : " +
-
-          data.registered +
-
-          "<br>" +
-
-          "Total présent : " +
-
-          data.totalPresent +
-
-          "<br>" +
-
-          "Participants supplémentaires : " +
-
-          data.additional +
-
-          "</span>" +
-
-          "<br><br>" +
-
-          "<button onclick='startScanner()'>" +
-
-          "📷 SCANNER LE PROCHAIN QR" +
-
-          "</button>";
-
-
-      } catch (error) {
-
-        document.getElementById("result")
-          .innerHTML =
-
-          "<span class='error'>" +
-
-          "❌ Erreur de connexion.<br><br>" +
-
-          error.message +
-
-          "</span>";
-
-      }
-
+      return;
     }
+
+    result.innerHTML =
+      "<span class='success'>" +
+      "✅ Présence enregistrée" +
+      "<br><br>" +
+      familyId +
+      "<br><br>" +
+      "Participants inscrits : " +
+      data.registered +
+      "<br>" +
+      "Total présent : " +
+      data.totalPresent +
+      "<br>" +
+      "Participants supplémentaires : " +
+      data.additional +
+      "</span>" +
+      "<br><br>" +
+      "<button onclick='startScanner()'>" +
+      "📷 SCANNER LE PROCHAIN QR" +
+      "</button>";
+
+  } catch (error) {
+
+    result.innerHTML =
+      "<span class='error'>" +
+      "❌ Connexion impossible.<br><br>" +
+      "L'enregistrement n'a pas pu être confirmé." +
+      "</span>";
+
+  }
+
+}
 // =====================================================
 // RETURN GIFT - ENREGISTRER LA DISTRIBUTION
 // =====================================================
