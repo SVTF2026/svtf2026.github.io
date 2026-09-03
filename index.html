@@ -1143,73 +1143,52 @@ document.querySelector(".temple-footer")
 
     async function verifyFamily(familyId) {
 
-      const result =
-        document.getElementById("result");
+  const result =
+    document.getElementById("result");
 
+  result.innerHTML =
+    "⏳ Recherche de la famille...";
 
-      result.innerHTML =
-        "⏳ Recherche de la famille...";
+  try {
 
+    const data =
+      await apiPostWithRetry(
+        {
+          action: "findFamily",
+          familyId: familyId,
+          token: getActiveToken()
+        },
+        result
+      );
 
-      try {
+    if (!data.success) {
 
-        const response =
-          await fetch(API_URL, {
-
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "text/plain;charset=utf-8"
-            },
-
-           body: JSON.stringify({
-
-  action: "findFamily",
-
-  familyId: familyId,
-
-  token: getActiveToken()
-
-})
-
-          });
-
-
-        const data =
-          await response.json();
-
-
-        if (!data.success) {
-          if (handleUnauthorized(data)) {
-  return;
-}
-
-          result.innerHTML =
-            "<span class='error'>" +
-            "❌ " +
-            data.message +
-            "</span>";
-
-          return;
-
-        }
-
-
-        showFamily(data);
-
-
-      } catch (error) {
-
-        result.innerHTML =
-          "<span class='error'>" +
-          "❌ Erreur de connexion.<br><br>" +
-          error.message +
-          "</span>";
-
+      if (handleUnauthorized(data)) {
+        return;
       }
 
+      result.innerHTML =
+        "<span class='error'>" +
+        "❌ " +
+        data.message +
+        "</span>";
+
+      return;
     }
+
+    showFamily(data);
+
+  } catch (error) {
+
+    result.innerHTML =
+      "<span class='error'>" +
+      "❌ Connexion impossible.<br><br>" +
+      "Le QR a bien été lu. Veuillez réessayer." +
+      "</span>";
+
+  }
+
+}
 
 // =====================================================
 // RETURN GIFT - VÉRIFIER LE QR
@@ -1225,36 +1204,21 @@ async function verifyReturnGift(familyId) {
 
   try {
 
-    const response =
-      await fetch(API_URL, {
-
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "text/plain;charset=utf-8"
-        },
-
-        body: JSON.stringify({
-
-  action: "findReturnGift",
-
-  familyId: familyId,
-
-  token: getActiveToken()
-
-})
-
-      });
-
     const data =
-      await response.json();
-
+      await apiPostWithRetry(
+        {
+          action: "findReturnGift",
+          familyId: familyId,
+          token: getActiveToken()
+        },
+        result
+      );
 
     if (!data.success) {
+
       if (handleUnauthorized(data)) {
-  return;
-}
+        return;
+      }
 
       result.innerHTML =
         "<span class='error'>" +
@@ -1266,30 +1230,18 @@ async function verifyReturnGift(familyId) {
     }
 
 
-    // ===============================================
-    // CADEAUX DÉJÀ DISTRIBUÉS
-    // ===============================================
-
     if (data.alreadyDistributed) {
 
       result.innerHTML =
-
         "<span class='error'>" +
-
         "⚠️ RETURN GIFT DÉJÀ DISTRIBUÉ" +
-
         "</span>" +
-
         "<br><br>" +
-
         "<strong>" +
         data.familyId +
         "</strong>" +
-
         "<br><br>" +
-
         "Cadeaux déjà remis : " +
-
         "<strong>" +
         data.giftsGiven +
         "</strong>";
@@ -1298,40 +1250,25 @@ async function verifyReturnGift(familyId) {
     }
 
 
-    // ===============================================
-    // CADEAUX À DISTRIBUER
-    // ===============================================
-
     result.innerHTML =
-
       "<strong>" +
       data.familyId +
       "</strong>" +
-
       "<br><br>" +
-
       "Participants présents : " +
-
       "<strong>" +
       data.totalPresent +
       "</strong>" +
-
       "<br><br>" +
-
       "🎁 Cadeaux à remettre : " +
-
       "<strong>" +
       data.giftsAllowed +
       "</strong>" +
-
       "<br><br>" +
-
       "<button onclick='saveReturnGift(" +
       JSON.stringify(data.familyId) +
       ")'>" +
-
       "🎁 DISTRIBUER" +
-
       "</button>";
 
 
@@ -1339,14 +1276,13 @@ async function verifyReturnGift(familyId) {
 
     result.innerHTML =
       "<span class='error'>" +
-      "❌ Erreur de connexion.<br><br>" +
-      error.message +
+      "❌ Connexion impossible.<br><br>" +
+      "Le QR a bien été lu. Veuillez réessayer." +
       "</span>";
 
   }
 
 }
-    
     // =====================================================
     // AFFICHER LA FAMILLE
     // =====================================================
