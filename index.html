@@ -184,11 +184,29 @@
   <body>
 <div id="loginSection">
 
-  <h2>🔐 Accès sécurisé</h2>
+  <div class="temple-header">
 
-<p>
-  Entrez le code bénévole ou choisissez l'accès Admin.
-</p>
+    <div class="ornament">
+      ❈ ॐ ❈
+    </div>
+
+    <div class="temple-name">
+      Sri Venkateswara Temple France
+    </div>
+
+  </div>
+
+  <h1>
+    Srivari Srinivasa Kalyanam 2026
+  </h1>
+
+  <h2>
+    🔐 ACCÈS SÉCURISÉ
+  </h2>
+
+  <p>
+    Entrez le code bénévole ou choisissez l'accès Admin.
+  </p>
 
   <input
     id="volunteerCode"
@@ -204,38 +222,16 @@
     👤 BÉNÉVOLE
   </button>
 
-  <button onclick="openAdminLogin()" id="adminModeButton">
-  🔐 ADMIN
-</button>
+  <button
+    onclick="openAdminLogin()"
+    id="adminModeButton"
+  >
+    🔐 ADMIN
+  </button>
+
   <div id="loginMessage"></div>
 
 </div>
-    <div id="appSection" style="display:none;">
-  <div id="topSection">
-
-  <div class="temple-header">
-    <div class="ornament">❈ ॐ ❈</div>
-    <div class="temple-name">
-      Sri Venkateswara Temple France
-    </div>
-  </div>
-
-  <h1>📷 SVTF 2026</h1>
-
-  <h2 id="modeTitle">Choisissez une opération</h2>
-
-</div>
-
-  <div class="mode-buttons">
-    
-    <button onclick="setModeAndScan('presence')" id="presenceModeButton">
-  📷 CONTRÔLE PRÉSENCE
-</button>
-
-<button onclick="setModeAndScan('gift')" id="giftModeButton">
-  🎁 RETURN GIFT
-</button>     
-  </div>
 <div id="adminLoginSection" style="display:none;">
 
   <h2>🔐 Accès Admin</h2>
@@ -265,6 +261,32 @@
   <div id="adminLoginMessage"></div>
 
 </div>
+    <div id="appSection" style="display:none;">
+  <div id="topSection">
+
+  <div class="temple-header">
+    <div class="ornament">❈ ॐ ❈</div>
+    <div class="temple-name">
+      Sri Venkateswara Temple France
+    </div>
+  </div>
+
+  <h1>📷 SVTF 2026</h1>
+
+  <h2 id="modeTitle">Choisissez une opération</h2>
+
+</div>
+
+  <div class="mode-buttons">
+    
+    <button onclick="setModeAndScan('presence')" id="presenceModeButton">
+  📷 CONTRÔLE PRÉSENCE
+</button>
+
+<button onclick="setModeAndScan('gift')" id="giftModeButton">
+  🎁 RETURN GIFT
+</button>     
+  </div>
   <div id="adminDashboard" style="display:none;">
 
   <h2>📊 TABLEAU ADMIN</h2>
@@ -488,15 +510,18 @@ let adminToken =
 // =====================================================
 // OUVRIR CONNEXION ADMIN
 // =====================================================
-
 function openAdminLogin() {
 
+  // Cacher l'accueil
   document.getElementById("loginSection")
     .style.display = "none";
 
+  // IMPORTANT :
+  // ne pas ouvrir l'application avant validation Admin
   document.getElementById("appSection")
-    .style.display = "block";
+    .style.display = "none";
 
+  // Afficher uniquement la connexion Admin
   document.getElementById("adminLoginSection")
     .style.display = "block";
 
@@ -506,8 +531,10 @@ function openAdminLogin() {
   document.getElementById("adminLoginMessage")
     .innerHTML = "";
 
-}
+  document.getElementById("adminCode")
+    .value = "";
 
+}
 
 // =====================================================
 // FERMER CONNEXION ADMIN
@@ -521,18 +548,17 @@ function closeAdminLogin() {
   document.getElementById("adminCode")
     .value = "";
 
-  if (!volunteerToken && !adminToken) {
+  document.getElementById("adminLoginMessage")
+    .innerHTML = "";
 
-    document.getElementById("appSection")
-      .style.display = "none";
+  // Revenir à la page d'accueil sécurisée
+  document.getElementById("appSection")
+    .style.display = "none";
 
-    document.getElementById("loginSection")
-      .style.display = "block";
-
-  }
+  document.getElementById("loginSection")
+    .style.display = "block";
 
 }
-
 
 // =====================================================
 // CONNEXION ADMIN
@@ -588,28 +614,28 @@ async function loginAdmin() {
       return;
     }
 
-    adminToken =
-      data.token;
+   adminToken =
+  data.token;
 
-    sessionStorage.setItem(
-      "svtfAdminToken",
-      adminToken
-    );
+sessionStorage.setItem(
+  "svtfAdminToken",
+  adminToken
+);
 
-    document.getElementById("adminLoginSection")
-      .style.display = "none";
+// Fermer l'écran de connexion Admin
+document.getElementById("adminLoginSection")
+  .style.display = "none";
 
-    document.getElementById("appSection")
+// Ouvrir l'application
+document.getElementById("appSection")
   .style.display = "block";
 
-    document.getElementById("adminLoginSection")
-  .style.display = "none";
-    
-    document.getElementById("adminCode")
-      .value = "";
+// Vider le code saisi
+document.getElementById("adminCode")
+  .value = "";
 
-    loadAdminStats();
-
+// Charger le tableau Admin
+loadAdminStats();
   } catch (error) {
 
     message.innerHTML =
