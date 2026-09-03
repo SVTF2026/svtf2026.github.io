@@ -219,17 +219,21 @@
   <br>
 
   <button onclick="loginVolunteer()">
-    👤 BÉNÉVOLE
-  </button>
+  👤 BÉNÉVOLE
+</button>
 
-  <button
-    onclick="openAdminLogin()"
-    id="adminModeButton"
-  >
-    🔐 ADMIN
-  </button>
+<div id="loginMessage"></div>
 
-  <div id="loginMessage"></div>
+<div style="margin-top: 22px;">
+  <strong>Accès administrateur</strong>
+</div>
+
+<button
+  onclick="openAdminLogin()"
+  id="adminModeButton"
+>
+  🔐 ADMIN
+</button>
 
 </div>
 <div id="adminLoginSection" style="display:none;">
