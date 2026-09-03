@@ -420,11 +420,82 @@ function handleUnauthorized(data) {
 // =====================================================
 // CONNEXION BÉNÉVOLE
 // =====================================================
+// =====================================================
+// APPEL API AVEC NOUVELLE TENTATIVE
+// =====================================================
 
+async function apiPostWithRetry(payload, statusElement) {
+
+  const attempts = 2;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+
+    const controller =
+      new AbortController();
+
+    // Maximum 12 secondes par tentative
+    const timeout =
+      setTimeout(function() {
+        controller.abort();
+      }, 12000);
+
+    try {
+
+      if (attempt === 2 && statusElement) {
+        statusElement.innerHTML =
+          "🔄 Nouvelle tentative de connexion...";
+      }
+
+      const response =
+        await fetch(API_URL, {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+
+          body:
+            JSON.stringify(payload),
+
+          signal:
+            controller.signal
+
+        });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new Error(
+          "Réponse serveur invalide."
+        );
+      }
+
+      return await response.json();
+
+    } catch (error) {
+
+      clearTimeout(timeout);
+
+      if (attempt === attempts) {
+        throw error;
+      }
+
+      // Attendre 1 seconde avant le 2e essai
+      await new Promise(function(resolve) {
+        setTimeout(resolve, 1000);
+      });
+
+    }
+
+  }
+
+}
 async function loginVolunteer() {
 
   const code =
-    document.getElementById("volunteerCode").value.trim();
+    document.getElementById("volunteerCode")
+      .value.trim();
 
   const message =
     document.getElementById("loginMessage");
@@ -432,34 +503,26 @@ async function loginVolunteer() {
   if (!code) {
 
     message.innerHTML =
-      "<span class='error'>Veuillez entrer le code bénévole.</span>";
+      "<span class='error'>" +
+      "Veuillez entrer le code bénévole." +
+      "</span>";
 
     return;
   }
 
   message.innerHTML =
-    "⏳ Vérification...";
+    "⏳ Connexion au serveur...";
 
   try {
 
-    const response =
-      await fetch(API_URL, {
-
-        method: "POST",
-
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-
-        body: JSON.stringify({
+    const data =
+      await apiPostWithRetry(
+        {
           action: "loginVolunteer",
           code: code
-        })
-
-      });
-
-    const data =
-      await response.json();
+        },
+        message
+      );
 
     if (!data.success) {
 
@@ -485,16 +548,20 @@ async function loginVolunteer() {
     document.getElementById("appSection")
       .style.display = "block";
 
+    message.innerHTML = "";
+
   } catch (error) {
 
     message.innerHTML =
-      "<span class='error'>❌ Erreur de connexion.</span>";
+      "<span class='error'>" +
+      "❌ Connexion impossible. Veuillez réessayer." +
+      "</span>";
 
   }
 
 }
 
-    // =====================================================
+// =====================================================
 // ADMIN - TOKEN
 // =====================================================
 
