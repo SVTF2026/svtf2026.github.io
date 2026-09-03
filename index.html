@@ -1426,20 +1426,36 @@ function showFamily(data) {
     document.getElementById("result");
 
   result.innerHTML =
-    "⏳ Enregistrement de la présence...";
+    "⏳ Enregistrement...";
 
   try {
 
-    const data =
-      await apiPostWithRetry(
-        {
-          action: "savePresence",
-          familyId: familyId,
-          numberNow: number,
-          token: getActiveToken()
+    const response =
+      await fetch(API_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
         },
-        result
-      );
+
+        body: JSON.stringify({
+
+          action: "savePresence",
+
+          familyId: familyId,
+
+          numberNow: number,
+
+          token: getActiveToken()
+
+        })
+
+      });
+
+    const data =
+      await response.json();
 
     if (!data.success) {
 
@@ -1480,8 +1496,8 @@ function showFamily(data) {
 
     result.innerHTML =
       "<span class='error'>" +
-      "❌ Connexion impossible.<br><br>" +
-      "L'enregistrement n'a pas pu être confirmé." +
+      "❌ Erreur de connexion.<br><br>" +
+      error.message +
       "</span>";
 
   }
