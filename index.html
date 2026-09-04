@@ -797,27 +797,16 @@ message.innerHTML =
 
       return;
     }
-
-
-    document.getElementById("statFamilies")
-      .textContent = data.familiesRegistered;
-
+    
     document.getElementById("statRegistered")
       .textContent = data.participantsRegistered;
 
     document.getElementById("statPresent")
       .textContent = data.participantsPresent;
-
-    document.getElementById("statAdditional")
-      .textContent = data.participantsAdditional;
-
+   
     document.getElementById("statGifts")
       .textContent = data.giftsDistributed;
-
-    document.getElementById("statGiftFamilies")
-      .textContent = data.familiesGifted;
-
-
+    
     document.getElementById("adminLoginSection")
       .style.display = "none";
 
