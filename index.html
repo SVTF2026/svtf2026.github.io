@@ -815,11 +815,19 @@ message.innerHTML =
         document.getElementById("statPresent")
       .textContent = data.participantsPresent;
 
-    document.getElementById("statGiftStock")
+        document.getElementById("statGiftStock")
       .textContent = data.returnGiftStock;
    
     document.getElementById("statGifts")
       .textContent = data.giftsDistributed;
+
+    document.getElementById("statGiftRemaining")
+      .textContent =
+      Math.max(
+        0,
+        Number(data.returnGiftStock) -
+        Number(data.giftsDistributed)
+      );
     
     document.getElementById("adminLoginSection")
       .style.display = "none";
