@@ -1393,56 +1393,30 @@ function showFamily(data) {
 
   if (data.alreadyScanned) {
 
-    message =
+  const additional =
+    Math.max(0, data.alreadyPresent - data.registered);
 
-      "<span class='warning-blink'>" +
-      "⚠️ QR DÉJÀ ENREGISTRÉ" +
-      "</span>" +
+  message =
+    "<span class='warning-blink'>" +
+    "⚠️ QR DÉJÀ ENREGISTRÉ" +
+    "</span>" +
+    "<br><br>" +
+    "<strong>" + data.familyId + "</strong>" +
+    "<br><br>" +
+    "Participants inscrits : " +
+    "<strong>" + data.registered + "</strong>" +
+    "<br><br>" +
+    "Participants présents : " +
+    "<strong>" + data.alreadyPresent + "</strong>" +
+    "<br><br>" +
+    "Participants supplémentaires : " +
+    "<strong>" + additional + "</strong>" +
+    "<br><br>" +
+    "<strong>Cette famille a déjà effectué son entrée.</strong>" +
+    "<br><br>" +
+    "Aucun participant supplémentaire ne peut être ajouté avec ce QR.";
 
-      "<br><br>" +
-
-      "<strong>" +
-      data.familyId +
-      "</strong>" +
-
-      "<br><br>" +
-
-      "Participants inscrits : " +
-      "<strong>" +
-      data.registered +
-      "</strong>" +
-
-      "<br><br>" +
-
-      "Participants déjà présents : " +
-      "<strong>" +
-      data.alreadyPresent +
-      "</strong>" +
-
-      "<br><br>" +
-
-      "Combien de nouvelles personnes arrivent maintenant ?" +
-
-      "<br>" +
-
-      "<input " +
-      "id='presentNow' " +
-      "type='number' " +
-      "min='0' " +
-      "inputmode='numeric'>" +
-
-      "<br>" +
-
-      "<button onclick='savePresence(" +
-      JSON.stringify(data.familyId) +
-      ")'>" +
-
-      "➕ AJOUTER" +
-
-      "</button>";
-
-  }
-
+}
   // =====================================================
   // PREMIER SCAN
   // =====================================================
