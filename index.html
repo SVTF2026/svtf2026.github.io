@@ -807,8 +807,11 @@ message.innerHTML =
     document.getElementById("statRegistered")
       .textContent = data.participantsRegistered;
 
-    document.getElementById("statPresent")
+        document.getElementById("statPresent")
       .textContent = data.participantsPresent;
+
+    document.getElementById("statGiftStock")
+      .textContent = data.returnGiftStock;
    
     document.getElementById("statGifts")
       .textContent = data.giftsDistributed;
