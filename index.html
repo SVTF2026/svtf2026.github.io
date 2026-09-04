@@ -749,8 +749,13 @@ async function loadAdminStats() {
     return;
   }
 
-  message.innerHTML =
-    "⏳ Chargement des statistiques...";
+ document.getElementById("adminDashboard")
+  .style.display = "block";
+
+message.innerHTML =
+  "<span class='warning-blink'>" +
+  "⏳ Chargement du tableau de statistiques…" +
+  "</span>";
 
   try {
 
