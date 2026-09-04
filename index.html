@@ -832,6 +832,14 @@ message.innerHTML =
         Number(data.returnGiftStock) -
         Number(data.giftsDistributed)
       );
+
+        document.getElementById("statGiftToDistribute")
+      .textContent =
+      Math.max(
+        0,
+        Number(data.participantsPresent) -
+        Number(data.giftsDistributed)
+      );
     
     document.getElementById("adminLoginSection")
       .style.display = "none";
