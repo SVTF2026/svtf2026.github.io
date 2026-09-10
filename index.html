@@ -1599,12 +1599,56 @@ function showFamily(data) {
       "📷 SCANNER LE PROCHAIN QR" +
       "</button>";
 
-  } catch (error) {
+   } catch (error) {
+
+    // Ne jamais renvoyer savePresence automatiquement.
+    // Vérifier d'abord si l'enregistrement a déjà réussi côté serveur.
+
+    result.innerHTML =
+      "⏳ Vérification de l'enregistrement...";
+
+    try {
+
+      const checkData =
+        await apiPostWithRetry(
+          {
+            action: "findFamily",
+            familyId: familyId,
+            token: getActiveToken()
+          },
+          result
+        );
+
+      if (
+        checkData.success &&
+        checkData.alreadyScanned
+      ) {
+
+        result.innerHTML =
+          "<span class='success'>" +
+          "✅ Présence enregistrée" +
+          "<br><br>" +
+          familyId +
+          "<br><br>" +
+          "Total présent : " +
+          checkData.alreadyPresent +
+          "</span>" +
+          "<br><br>" +
+          "<button onclick='startScanner()'>" +
+          "📷 SCANNER LE PROCHAIN QR" +
+          "</button>";
+
+        return;
+      }
+
+    } catch (checkError) {
+      // La vérification a également échoué.
+    }
 
     result.innerHTML =
       "<span class='error'>" +
-      "❌ Erreur de connexion.<br><br>" +
-      error.message +
+      "❌ Connexion interrompue.<br><br>" +
+      "Impossible de confirmer l'enregistrement." +
       "</span>";
 
   }
