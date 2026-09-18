@@ -470,7 +470,7 @@ function handleUnauthorized(data) {
 
 async function apiPostWithRetry(payload, statusElement) {
 
-  const attempts = 1;
+ const attempts = 2;
 
   for (let attempt = 1; attempt <= attempts; attempt++) {
 
@@ -481,7 +481,7 @@ async function apiPostWithRetry(payload, statusElement) {
     const timeout =
       setTimeout(function() {
         controller.abort();
-      }, 12000);
+      }, 6000);
 
     try {
 
