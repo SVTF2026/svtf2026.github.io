@@ -481,7 +481,7 @@ async function apiPostWithRetry(payload, statusElement) {
     const timeout =
       setTimeout(function() {
         controller.abort();
-      }, 6000);
+      },  12000);
 
     try {
 
