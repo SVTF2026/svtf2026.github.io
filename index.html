@@ -470,24 +470,27 @@ function handleUnauthorized(data) {
 
 async function apiPostWithRetry(payload, statusElement) {
 
- const attempts = 1;
+  const attempts = 2;
 
   for (let attempt = 1; attempt <= attempts; attempt++) {
 
-    const controller =
-      new AbortController();
+    const controller = new AbortController();
 
-    // Maximum 12 secondes par tentative
+    // 1er essai rapide, 2e essai un peu plus tolérant
+    const timeoutDuration =
+      attempt === 1 ? 7000 : 10000;
+
     const timeout =
       setTimeout(function() {
         controller.abort();
-      },  12000);
+      }, timeoutDuration);
 
     try {
 
       if (attempt === 2 && statusElement) {
         statusElement.innerHTML =
-          "🔄 Nouvelle tentative de connexion...";
+          "🔄 Connexion momentanément lente.<br>" +
+          "Nouvelle tentative automatique...";
       }
 
       const response =
@@ -499,23 +502,21 @@ async function apiPostWithRetry(payload, statusElement) {
             "Content-Type": "text/plain;charset=utf-8"
           },
 
-          body:
-            JSON.stringify(payload),
+          body: JSON.stringify(payload),
 
-          signal:
-            controller.signal
+          signal: controller.signal
 
         });
 
       clearTimeout(timeout);
 
       if (!response.ok) {
-        throw new Error(
-          "Réponse serveur invalide."
-        );
+        throw new Error("Réponse serveur invalide.");
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      return data;
 
     } catch (error) {
 
@@ -525,9 +526,9 @@ async function apiPostWithRetry(payload, statusElement) {
         throw error;
       }
 
-      // Attendre 1 seconde avant le 2e essai
+      // Petite pause seulement avant la 2e tentative
       await new Promise(function(resolve) {
-        setTimeout(resolve, 1000);
+        setTimeout(resolve, 300);
       });
 
     }
