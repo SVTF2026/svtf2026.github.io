@@ -1803,17 +1803,62 @@ async function saveReturnGift(familyId) {
 
   } catch (error) {
 
-    result.innerHTML =
+  // Ne jamais renvoyer saveReturnGift automatiquement.
+  // Vérifier d'abord si la distribution a déjà été enregistrée.
 
-      "<span class='error'>" +
+  result.innerHTML =
+    "⏳ Vérification de la distribution...";
 
-      "❌ Erreur de connexion.<br><br>" +
+  try {
 
-      error.message +
+    const checkData =
+      await apiPostWithRetry(
+        {
+          action: "findReturnGift",
+          familyId: familyId,
+          token: getActiveToken()
+        },
+        result
+      );
 
-      "</span>";
+    if (
+      checkData.success &&
+      checkData.alreadyDistributed
+    ) {
 
+      result.innerHTML =
+        "<span class='success'>" +
+        "✅ RETURN GIFT DISTRIBUÉ" +
+        "</span>" +
+        "<br><br>" +
+        "<strong>" +
+        familyId +
+        "</strong>" +
+        "<br><br>" +
+        "🎁 Cadeaux remis : " +
+        "<strong>" +
+        checkData.giftsGiven +
+        "</strong>" +
+        "<br><br>" +
+        "<button onclick='startScanner()'>" +
+        "🎁 SCANNER LE PROCHAIN QR" +
+        "</button>";
+
+      return;
+    }
+
+  } catch (checkError) {
+    // La vérification a également échoué.
   }
+
+  result.innerHTML =
+    "<span class='error'>" +
+    "❌ Connexion interrompue.<br><br>" +
+    "Impossible de confirmer la distribution.<br>" +
+    "Ne distribuez pas une deuxième fois sans rescanner le QR." +
+    "</span>";
+
+}
 
 }
   </script>
